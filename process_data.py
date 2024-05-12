@@ -5,9 +5,9 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from scipy.stats import skew, yeojohnson, probplot
 
-
 folder_path = "./CSV Files"  
 data_frames = []
+count = 0
 
 ##Data Loading
 
@@ -18,27 +18,30 @@ for file in os.listdir(folder_path):
         if len(parts) < 2:
             print("Skipping csv due to unexpected filename format:", file)
             continue
-        participant = parts[0]
-        correctness = parts[1].replace(".csv", "")
+        count += 1 
+print("Total number of CSV files processed:", count)
         
-        df = pd.read_csv(os.path.join(folder_path, file))
+participant = parts[0]
+correctness = parts[1].replace(".csv", "")
+        
+df = pd.read_csv(os.path.join(folder_path, file))
         
         ##Data Cleaning
         
-        df = pd.read_csv(os.path.join(folder_path, file), on_bad_lines="skip")
-        df = pd.read_csv(os.path.join(folder_path, file), delimiter=",")
-        df.columns = df.columns.str.strip()
-        df.columns = df.columns.str.replace(r'\s+', " ", regex=True)
-        df.rename(columns=lambda x: x.strip().replace("  ", " "), inplace=True)
+df = pd.read_csv(os.path.join(folder_path, file), on_bad_lines="skip")
+df = pd.read_csv(os.path.join(folder_path, file), delimiter=",")
+df.columns = df.columns.str.strip()
+df.columns = df.columns.str.replace(r'\s+', " ", regex=True)
+df.rename(columns=lambda x: x.strip().replace("  ", " "), inplace=True)
         
-        if correctness == "good":
-            label = 1
-        else:
-            label = 0
+if correctness == "good":
+    label = 1
+else:
+    label = 0
 
-        df["label"] = label
-        df["participant"] = participant
-        data_frames.append(df)
+df["label"] = label
+df["participant"] = participant
+data_frames.append(df)
 
 full_data = pd.concat(data_frames, ignore_index=True)
 full_data.to_csv("./combined_data.csv", index=False)
@@ -135,3 +138,4 @@ plt.title(f"Distribution of {feature_name} After")
 
 plt.tight_layout()
 plt.show()
+
