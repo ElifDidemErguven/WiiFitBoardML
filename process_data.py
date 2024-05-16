@@ -3,139 +3,116 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-from scipy.stats import skew, yeojohnson, probplot
+import seaborn as sns
+from scipy.stats import yeojohnson, skew
 
-folder_path = "./CSV Files"  
+# Function to correct skewness
+def correct_skewness(df, columns):
+    for col in columns:
+        # Compute skewness
+        skew_val = skew(df[col])
+        
+        # Apply transformations based on skewness
+        if skew_val > 1:
+            df[col] = np.log1p(df[col])  # log1p handles zero values, Log Transformation: for positively skewed data.
+        elif skew_val > 0.5:
+            df[col] = np.sqrt(df[col])  #Square Root Transformation for moderately skewed data.
+        else:
+            df[col], _ = yeojohnson(df[col])  # Yeo-Johnson for negatively skewed data.
+    return df
+
+# Set up folder paths
+folder_path = "./CSV Files"
+combined_data_path = "./combined_data.csv"
+standardized_data_folder = "./Standardized Csv Files"
+visualization_folder_path = "./Data Visualization"
+
+#List to hold data frames
 data_frames = []
-count = 0
 
-##Data Loading
-
+# Data Loading
 for file in os.listdir(folder_path):
     if file.endswith(".csv"):
-        print("Processing file:", file)
+        print(f"Processing file: {file}")
         parts = file.split("-")
         if len(parts) < 2:
-            print("Skipping csv due to unexpected filename format:", file)
+            print(f"Skipping csv due to unexpected filename format: {file}")
             continue
-        count += 1 
-print("Total number of CSV files processed:", count)
-        
-participant = parts[0]
-correctness = parts[1].replace(".csv", "")
-        
-df = pd.read_csv(os.path.join(folder_path, file))
-        
-        ##Data Cleaning
-        
-df = pd.read_csv(os.path.join(folder_path, file), on_bad_lines="skip")
-df = pd.read_csv(os.path.join(folder_path, file), delimiter=",")
-df.columns = df.columns.str.strip()
-df.columns = df.columns.str.replace(r'\s+', " ", regex=True)
-df.rename(columns=lambda x: x.strip().replace("  ", " "), inplace=True)
-        
-if correctness == "good":
-    label = 1
-else:
-    label = 0
 
-df["label"] = label
-df["participant"] = participant
-data_frames.append(df)
+        participant = parts[0]
+        correctness = parts[1].replace(".csv", "")
+        label = 1 if correctness == "good" else 0
 
+        df = pd.read_csv(os.path.join(folder_path, file))
+        df.columns = df.columns.str.strip().str.replace(r'\s+', " ", regex=True)
+        df.rename(columns=lambda x: x.strip().replace("  ", " "), inplace=True)
+
+        df["label"] = label
+        df["participant"] = participant
+        data_frames.append(df)
+
+# Combine everything in the data frames list into one DataFrame
 full_data = pd.concat(data_frames, ignore_index=True)
-full_data.to_csv("./combined_data.csv", index=False)
 
-##Missing Data 
+# Save the combined data to a CSV file
+full_data.to_csv(combined_data_path, index=False)
 
-fd = pd.read_csv("./combined_data.csv")
-print(fd.shape)
+# the combined data is now fd, checking fd's shape and missing values
+fd = pd.read_csv(combined_data_path)
+print(f"Data shape: {fd.shape}")
+print(f"Total number of null values: {fd.isnull().sum().sum()}")
 
-#print(fd.isnull().sum())
-print("Total number of null values ", fd.isnull().sum().sum())
+#copy the data before any process as "raw data" which will be used later for data visualization
+raw_data = fd.copy()
 
-#Skewness
-numeric_columns = fd.select_dtypes(include=[np.number]).columns.drop("label", "participant")
-initial_skewness = fd[numeric_columns].apply(skew)
-print("Initial Skewness:\n", initial_skewness)
+# Apply skewness correction, (label and participant is dropped)
+numeric_columns = fd.select_dtypes(include=[np.number]).columns.drop(["label"])
+print("HERE ARE THE NUMERIC COLUMNS" , numeric_columns)
 
-# Check skewness and apply transformations
-for col in numeric_columns:
-    fd[col] += 0.001  # Shift all values slightly to handle zeros in log transformations
-    skew_val = skew(fd[col])
-    # For positive skewness > 1
-    if skew_val > 1:
-        # Apply log transformation
-        transformed = np.log1p(fd[col])
-        # Recheck skewness
-        if skew(transformed) > 1:  # Check if still highly skewed
-            fd[col] = np.sqrt(transformed + 1)  # Apply a milder transformation
-        else:
-            fd[col] = transformed  # Use log-transformed data
+# Apply skewness correction
+fd_corrected = correct_skewness(fd, numeric_columns)
 
-    # For negative skewness < -1
-    elif skew_val < -1:
-        fd[col], _ = yeojohnson(fd[col])  # Apply Yeo-Johnson transformation
-
-# Visualizing the effect of the transformation
-    plt.figure(figsize=(12, 6))
-    plt.subplot(1, 2, 1)
-    plt.hist(fd[col], bins=30, alpha=0.7)
-    plt.title(f"Histogram of {col} After Transformation")
-
-    plt.subplot(1, 2, 2)
-    probplot(fd[col], dist="norm", plot=plt)
-    plt.title(f"Q-Q plot for {col}")
-    plt.show()
-
-post_skewness = fd[numeric_columns].apply(skew)
-print("Post-Transformation Skewness:\n", post_skewness)
-
-# Save or continue processing as needed
-fd.to_csv("./combined_data.csv", index=False)
-
-##Data Standardization
-
-# Separate label and participant
-X = fd.drop(["label", "participant"], axis=1)  
-y = fd["label"]  # Target Variable
-
+# Standardize the skewness corrected data
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)  # Apply scaling to features
+X = fd_corrected[numeric_columns]
+X_scaled = scaler.fit_transform(X)
+fd_standardized = pd.DataFrame(X_scaled, columns=numeric_columns)
 
-# Save the standardized features and labels to CSVs
-pd.DataFrame(X_scaled, columns=X.columns).to_csv("./Standardized Csv Files/features.csv", index=False)
-y.to_csv("./Standardized Csv Files/labels.csv", index=False)
+# Add 'label' and 'participant' back to the standardized DataFrame
+fd_standardized["label"] = fd_corrected["label"].values
+fd_standardized["participant"] = fd_corrected["participant"].values
 
-# Checking summary statistics
-pre_standardization_mean = X.mean()
-pre_standardization_std = X.std()
+# Save standardized features and labels separately
+features = fd_standardized.drop(columns=["label", "participant"])
+labels = fd_standardized["label"]
 
-print("Mean before standardization:\n", pre_standardization_mean)
-print("Standard deviation before standardization:\n", pre_standardization_std)
+features.to_csv(os.path.join(standardized_data_folder, "features.csv"), index=False)
+labels.to_csv(os.path.join(standardized_data_folder, "labels.csv"), index=False)
 
-# After standardization
-standardized_mean = X_scaled.mean(axis=0)
-standardized_std = X_scaled.std(axis=0)
+# Save fully processed data
+fd_standardized.to_csv(combined_data_path, index=False)
 
-print("Mean after standardization:\n", standardized_mean)
-print("Standard deviation after standardization:\n", standardized_std)
+# Visualization function to save figures
+def visualize_data(df_before, df_after, title_before, title_after, columns, process):
+    sns.set_theme(style="whitegrid")
+    for col in columns:
+        fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+        
+        sns.histplot(df_before[col], bins=30, kde=True, ax=axes[0])
+        axes[0].set_title(f"{title_before}: {col}")
+        
+        sns.histplot(df_after[col], bins=30, kde=True, ax=axes[1])
+        axes[1].set_title(f"{title_after}: {col}")
+        
+        plt.tight_layout()
+        fig.savefig(os.path.join(visualization_folder_path, f"{process}_{col}.png"))
+        plt.close(fig)
 
-# Visualizing distributions
-feature_name = 'Sensor 1 (kg)'  
+# Visualization before and after skewness correction
+visualize_data(raw_data, fd_corrected, "Before Skewness Correction", "After Skewness Correction", numeric_columns, "Skewness_Correction")
 
-plt.figure(figsize=(10, 5))
+# Visualization before and after standardization
+visualize_data(fd_corrected, fd_standardized, "After Skewness Correction", "After Standardization", numeric_columns, "Standardization")
 
-# Histogram before standardization
-plt.subplot(1, 2, 1)
-plt.hist(X[feature_name], bins=30, alpha=0.7)
-plt.title(f"Distribution of {feature_name} Before")
-
-# Histogram after standardization
-plt.subplot(1, 2, 2)
-plt.hist(X_scaled[:, X.columns.get_loc(feature_name)], bins=30, alpha=0.7)
-plt.title(f"Distribution of {feature_name} After")
-
-plt.tight_layout()
-plt.show()
-
+# Visualization raw vs fully processed
+visualize_data(raw_data, fd_standardized, "Raw Data", "Fully Processed Data", numeric_columns, "Raw_vs_Fully_Processed")
