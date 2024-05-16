@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import yeojohnson, skew
@@ -73,7 +73,7 @@ print("HERE ARE THE NUMERIC COLUMNS" , numeric_columns)
 fd_corrected = correct_skewness(fd, numeric_columns)
 
 # Standardize the skewness corrected data
-scaler = StandardScaler()
+scaler = MinMaxScaler(feature_range=(0, 1))
 X = fd_corrected[numeric_columns]
 X_scaled = scaler.fit_transform(X)
 fd_standardized = pd.DataFrame(X_scaled, columns=numeric_columns)
@@ -105,7 +105,7 @@ def visualize_data(df_before, df_after, title_before, title_after, columns, proc
         axes[1].set_title(f"{title_after}: {col}")
         
         plt.tight_layout()
-        fig.savefig(os.path.join(visualization_folder_path, f"{process}_{col}.png"))
+        fig.savefig(os.path.join("./", f"{process}_{col}.png"))
         plt.close(fig)
 
 # Visualization before and after skewness correction
