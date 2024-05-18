@@ -1,51 +1,51 @@
-﻿Name;Age;Gender;Weight;Height
-Osama;22;Male;70;174
-Elie;28;Male;104;175
-Hisham;27;Male;62;167
-Abdelrahman;21;Male;81;175
-Omar;26;Male;103;182
-Kami;23;Male;82;183
-Bisher;21;Male;96;178
-Bisher 2;21;Male;102;178
-Yousef;21;Male;107;189
-Mustafa;21;Male;130;175
-Catherine;21;Female;62;163
-Raghd;20;Female;64;172
-Yaser;20;Male;68;180
-Alaa;23;Male;90;174
-Yahya;21;Male;78;174
-Khaled;21;Male;59;177
-Nada;22;Female;72;163
-Abdulrazak;23;Male;75;180
-Aya;20;Female;86;166
-Abdelrahman 2;21;Male;84;175
-Hisham 2;27;Male;66;167
-Ayman;26;Male;83;180
-Miray;21;Female;59;169
-Eyup;23;Male;83;175
-Sude;18;Female;52;165
-Areej;22;Female;61;157
-Abdullah;21;Male;76;163
-Abdullah 2;21;Male;80;163
-Areej 2;22;Female;66;157
-Aya 2;20;Female;91;166
-Catherine 2;21;Female;67;163
-Khaled 2;21;Male;64;177
-Mustafa 2;21;Male;135;175
-Nada 2;22;Female;77;163
-Raghd 2;20;Female;69;172
-Yousef 2;21;Male;112;189
-Hakan;22;Male;71;173
-Ahmet;22;Male;75;170
-Sude 2;18;Female;54;165
-Eyup 2;23;Male;85;175
-Miray 2;21;Female;61;169
-ayse;23;Female;57;172
-ayse 2;23;Female;62;172
-Merve;25;Female;63;153
-Merve 2;25;Female;68;153
-Ammar;22;Male;85;190
-Ammar 2;22;Male;90;190
-Kerim;22;Male;84;187
-Kerim 2;22;Male;89;187
-Kami 2;23;Male;87;183
+﻿Name,Age,Gender,Weight,Height
+Osama,22,Male,70,174
+Ellie,28,Male,104,175
+Hisham,27,Male,62,167
+Abood,21,Male,81,175
+Omar,26,Male,103,182
+Kami,23,Male,82,183
+Bisher,21,Male,96,178
+Bisher2,21,Male,102,178
+Yousef,21,Male,107,189
+Mustafa,21,Male,130,175
+Catherine,21,Female,62,163
+Raghed,20,Female,64,172
+Yasser,20,Male,68,180
+Alaa,23,Male,90,174
+Yahya,21,Male,78,174
+Khaled,21,Male,59,177
+Nada,22,Female,72,163
+Abdulrazak,23,Male,75,180
+Aya,20,Female,86,166
+Abood2,21,Male,84,175
+Hisham2,27,Male,66,167
+Ayman,26,Male,83,180
+Miray,21,Female,59,169
+Eyup,23,Male,83,175
+Sude,18,Female,52,165
+Areej,22,Female,61,157
+Abdullah,21,Male,76,163
+Abdullah2,21,Male,80,163
+Areej2,22,Female,66,157
+Aya2,20,Female,91,166
+Catherine2,21,Female,67,163
+Khaled2,21,Male,64,177
+Mustafa2,21,Male,135,175
+Nada2,22,Female,77,163
+Raghed2,20,Female,69,172
+Yousef2,21,Male,112,189
+Hakan,22,Male,71,173
+Ahmet,22,Male,75,170
+Sude2,18,Female,54,165
+Eyup2,23,Male,85,175
+Miray2,21,Female,61,169
+Ayse,23,Female,57,172
+Ayse2,23,Female,62,172
+Merve,25,Female,63,153
+Merve2,25,Female,68,153
+Ammar,22,Male,85,190
+Ammar2,22,Male,90,190
+Kerim,22,Male,84,187
+Kerim2,22,Male,89,187
+Kami2,23,Male,87,183
