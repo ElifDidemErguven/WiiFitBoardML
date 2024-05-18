@@ -24,7 +24,7 @@ Y =np.asarray(Y)
 #Check if you still have to give max iter to Logistic Reg, because we are Standardizing the data!!!
 #models = [LogisticRegression(max_iter=5000), XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5), SVC(kernel="linear"), SVC(kernel="rbf"), SVC(kernel="poly", degree=2), SVC(kernel="poly", degree=3), SVC(kernel="poly", degree=4),
 #SVC(kernel="poly", degree=5),SVC(kernel="sigmoid"), KNeighborsClassifier(),RandomForestClassifier(random_state= 42), DecisionTreeClassifier(random_state=0),GaussianNB()]
-models = [XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5), GaussianNB()]
+models = [XGBClassifier(n_estimators=8, learning_rate=0.12, max_depth=2), GaussianNB()]
 
 def compare_models_cross_validation():
     for model in models:

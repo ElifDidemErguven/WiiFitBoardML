@@ -42,7 +42,21 @@ def plot_line(df, columns, filename):
     ax1.bar(df.index, df[df.columns[7]], color='gray', alpha=0.3, label=df.columns[7])
     ax1.set_xlabel('Index')
     ax1.set_ylabel('KG Values')
-    ax1.set_title(f'Line Plot of 4 Columns with Bar Plot of 1 Column from {filename}')
+    ax1.set_title(f'Sensor and total force values of {filename.split("-")[0]}, {filename.split("-")[1].split(".")[0]} exercise')
+    
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='upper left')
+    plt.show()
+
+def plot_line2(df, columns, filename):
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+    for col in columns:
+        ax1.plot(df.index, df[col], label=col)
+
+    ax1.bar(df.index, df[df.columns[6]], color='gray', alpha=0.3, label=df.columns[6])
+    ax1.set_xlabel('Index')
+    ax1.set_ylabel('KG Values')
+    ax1.set_title(f'Sensor and total force values of {filename.split("-")[0]}, {filename.split("-")[1].split(".")[0]} exercise')
     
     lines, labels = ax1.get_legend_handles_labels()
     ax1.legend(lines, labels, loc='upper left')
@@ -50,6 +64,7 @@ def plot_line(df, columns, filename):
 
 plot_line(df1, columns_tobe_plot, random_csv_file1)
 plot_line(df0, columns_tobe_plot, random_csv_file0)
-#plot_line(combined_df, columns_tobe_plot)
+filtered_df = combined_df[combined_df['label'] == 1]
+#plot_line2(filtered_df, columns_tobe_plot, "combined_data.csv")
 
 

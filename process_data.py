@@ -41,12 +41,24 @@ def detect_stable_start(data, threshold, window_size):
 def clean_data(data, start_index):
     return data[start_index:]
 
+def plot(data,title):
+    window_size=int(len(data)*(32/100))
+    threshold = determine_threshold(data)
+    start_index = detect_stable_start(data, threshold, window_size)
+    cleaned_data = clean_data(data, start_index)
+
+    plt.figure()
+    plt.title(title)
+    plt.plot(data)
+
+    plt.plot(cleaned_data)
+    plt.show()
+
 # Set up folder paths
 folder_path = "./CSV Files"
 combined_data_path = "./combined_data.csv"
 standardized_data_folder = "./Standardized Csv Files"
 visualization_folder_path = "./Data Visualization"
-
 #List to hold data frames
 data_frames = []
 
@@ -62,6 +74,7 @@ for file in os.listdir(folder_path):
         participant = parts[0]
         correctness = parts[1].replace(".csv", "")
         label = 1 if correctness == "good" else 0
+        
 
         df = pd.read_csv(os.path.join(folder_path, file))
         df.columns = df.columns.str.strip().str.replace(r'\s+', " ", regex=True)
@@ -70,25 +83,11 @@ for file in os.listdir(folder_path):
         df["label"] = label
         df["participant"] = participant
         df = df.drop("ms", axis=1)
-        window_size=int(len(df["Total Force (kg)"])*(30/100))
+        window_size=int(len(df["Total Force (kg)"])*(32/100))
         threshold = determine_threshold(df["Total Force (kg)"])
         start_index = detect_stable_start(df["Total Force (kg)"], threshold, window_size)
         df = clean_data(df, start_index)
         data_frames.append(df)
-
-
-
-def plot(data,title):
-    window_size=int(len(data)*(20/100))
-    threshold = determine_threshold(data)
-    start_index = detect_stable_start(data, threshold, window_size)
-    cleaned_data = clean_data(data, start_index)
-
-    plt.figure()
-    plt.title(title)
-    plt.plot(data)
-
-    plt.plot(cleaned_data)
 
 # Combine everything in the data frames list into one DataFrame
 full_data = pd.concat(data_frames, ignore_index=True)
