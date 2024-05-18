@@ -21,6 +21,26 @@ def correct_skewness(df, columns):
             df[col], _ = yeojohnson(df[col])  # Yeo-Johnson for negatively skewed data.
     return df
 
+def determine_threshold(data, initial_portion=0.1, multiplier=2):
+    initial_data = data[:int(len(data) * initial_portion)]
+    mean_initial = np.mean(initial_data)
+    std_initial = np.std(initial_data)
+    threshold = mean_initial + multiplier * std_initial
+    return threshold
+
+def moving_average(data, window_size):
+    return np.convolve(data, np.ones(window_size)/window_size, mode='valid')
+
+def detect_stable_start(data, threshold, window_size):
+    smoothed_data = moving_average(data, window_size)
+    for i in range(len(smoothed_data)):
+        if smoothed_data[i] > threshold:
+            return i + window_size - 1  # Adjust for the length of the moving average window
+    return 0  # Default to the start if no stable point found
+
+def clean_data(data, start_index):
+    return data[start_index:]
+
 # Set up folder paths
 folder_path = "./CSV Files"
 combined_data_path = "./combined_data.csv"
@@ -49,7 +69,26 @@ for file in os.listdir(folder_path):
 
         df["label"] = label
         df["participant"] = participant
+        df = df.drop("ms", axis=1)
+        window_size=int(len(df["Total Force (kg)"])*(30/100))
+        threshold = determine_threshold(df["Total Force (kg)"])
+        start_index = detect_stable_start(df["Total Force (kg)"], threshold, window_size)
+        df = clean_data(df, start_index)
         data_frames.append(df)
+
+
+
+def plot(data,title):
+    window_size=int(len(data)*(20/100))
+    threshold = determine_threshold(data)
+    start_index = detect_stable_start(data, threshold, window_size)
+    cleaned_data = clean_data(data, start_index)
+
+    plt.figure()
+    plt.title(title)
+    plt.plot(data)
+
+    plt.plot(cleaned_data)
 
 # Combine everything in the data frames list into one DataFrame
 full_data = pd.concat(data_frames, ignore_index=True)
@@ -109,10 +148,10 @@ def visualize_data(df_before, df_after, title_before, title_after, columns, proc
         plt.close(fig)
 
 # Visualization before and after skewness correction
-visualize_data(raw_data, fd_corrected, "Before Skewness Correction", "After Skewness Correction", numeric_columns, "Skewness_Correction")
+#visualize_data(raw_data, fd_corrected, "Before Skewness Correction", "After Skewness Correction", numeric_columns, "Skewness_Correction")
 
 # Visualization before and after standardization
-visualize_data(fd_corrected, fd_standardized, "After Skewness Correction", "After Standardization", numeric_columns, "Standardization")
+#visualize_data(fd_corrected, fd_standardized, "After Skewness Correction", "After Standardization", numeric_columns, "Standardization")
 
 # Visualization raw vs fully processed
-visualize_data(raw_data, fd_standardized, "Raw Data", "Fully Processed Data", numeric_columns, "Raw_vs_Fully_Processed")
+#visualize_data(raw_data, fd_standardized, "Raw Data", "Fully Processed Data", numeric_columns, "Raw_vs_Fully_Processed")
